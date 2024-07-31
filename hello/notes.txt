@@ -1,0 +1,12 @@
+
+go mod init example.com/greetings
+greetings.go -> package greetings
+
+go mod init example.com/hello
+hello.go -> package main 
+	import "example.com/greetings"
+
+go mod edit -replace example.com/greetings=../greetings
+go mod tidy
+
+
