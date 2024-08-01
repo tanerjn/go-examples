@@ -3,8 +3,6 @@ package main
 import (
     "net/http"
     "github.com/gin-gonic/gin"
-    "fmt"
-    "example/greeting"
 )
 
 // Album represents data about a record album.
@@ -64,12 +62,9 @@ func main() {
     router.GET("/albums", getAlbums)
     router.GET("/albums/:id", getAlbumByID)
     router.POST("/albums", postAlbums)
-    //if err := router.Run("localhost:8080"); err != nil{
-    //    return
-    // }
-
-    message := greeting.Hello("Gladys")
-    fmt.Println(message)
+    if err := router.Run("localhost:8080"); err != nil{
+        return
+    }
 }
 
 
