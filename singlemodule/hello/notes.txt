@@ -8,5 +8,8 @@ hello.go -> package main
 
 go mod edit -replace example.com/greetings=../greetings
 go mod tidy
-
+go build
+go list -f '{{.Target}}'
+go install
+export PATH...
 

@@ -15,10 +15,10 @@ func main() {
     log.SetFlags(0)
     
     // Slice of names
-//    names :=  []string{"Alice", "Bob", "Gladys"}
+    names :=  []string{"Alice", "Bob", "Gladys"}
 
     // Request a greeting message.
-    messages, err := greetings.Hello("Gladys")
+    messages, err := greetings.MultipleHellos(names)
 
     // If an error was returned, print it to the console and
     // exit the program.
