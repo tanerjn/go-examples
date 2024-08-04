@@ -1,0 +1,9 @@
+Great power comes with great responsibiliy.
+
+export DBUSER=username
+expoer DBPASS=password
+
+GRANT ALL PRIVILEGES ON recordings.* TO 'username'@'localhost';
+
+
+
