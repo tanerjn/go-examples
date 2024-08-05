@@ -1,0 +1,4 @@
+go test -run=TestReverse (Traditional tests at function depth)
+go test -run=FuzzReverse (`` `` `` `` `` )
+go test -fuzz=Fuzz -fuzztime=10s -v (add random inputs to seed corpus,!heavy loading!, use -fuzztime optios for restrictions.
+
