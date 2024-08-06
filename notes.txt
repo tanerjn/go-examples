@@ -1,0 +1,5 @@
+govulncheck ./...
+
+find packages with vulnerabilities
+see if it effects your code
+find ways to remove vulnerability --upgrade, fix the code etc.
