@@ -8,6 +8,8 @@ import 	(
 	"math/cmplx"
 	"runtime"
 	"reflect"
+	"strings"
+	"golang.org/x/tour/pic"
 )
 
 var a, b  int = 1, 2
@@ -193,13 +195,215 @@ func main(){
 	}
 
 	prArray := [5]int{6,7,8,9,0}
+	fmt.Println(len(prArray[0:2]))
 
 	if myStruct.matchesAnyArray(prArray) {
 		fmt.Println("array matches")
 	} else {
 		fmt.Println("no match")
 	}
+
+	fmt.Printf("Type: %T Value: %v\n", isFalse, isFalse)
+	fmt.Printf("Type: %T Value: %v\n", maxInt, maxInt)
+	fmt.Printf("Type: %T Value: %v\n", complx, complx)
+	const Truth = true
+	fmt.Printf("Truth type %T", Truth)
+	fmt.Printf("\nvalue %v\n", Big)
+	fmt.Println(needInt(Big))
+	sl1 := make([]int, 5) //len(a) = 5
+	sl2 := make([]int, 4, 5) //len(b) = 5, cap(b) = 5
+	printSlice("sl1", sl1) 
+	printSlice("sl2", sl2)	
+
+	board := [][]string {
+		[]string{"","",""},
+		[]string{"","",""},
+		[]string{"","",""},
+	}
+
+	board[0][0] = "X"
+	board[0][1] = "0"
+	board[0][2] = "0"
+	board[1][0] = "X"
+	board[1][1] = "X"
+	board[1][2] = "0"
+	board[2][0] = "X"
+	board[2][1] = "0"
+	board[2][2] = "X"
+
+	for i:=0; i < len(board); i++ {
+		fmt.Printf("%s\n", strings.Join(board[i], " "))
+	}
+
+	var s[]int
+	s = append(s, 1)
+	printSliceInt(s)
+	s = append(s, 1, 2, 3)
+	printSliceInt(s)
+
+	for i, v := range powa{
+		fmt.Printf("2**%d = %d\n", i, v)
+	}
+
+	for _, value := range powa {
+		fmt.Printf("%d\n", value)
+	}
+
+	for i, _ := range powa {
+		fmt.Printf("%d\n", i)
+	}
+
+	pic.Show(Pic)
+
+	m = make(map[string]Coordinates)
+	m["Bell Bell"] = Coordinates{
+		10.1231, -12.123,
+	}
+
+	m["Boll Boll"] = Coordinates{
+		12.1231, -12.123,
+	}
+
+	m["Boll Boll Boll"] = Coordinates{
+		10.1231, -12.123,
+	}
+
+	fmt.Println(m["Bell Bell"])
+	fmt.Println(m["Boll Boll"])
+	fmt.Println(s1["bell"], s1["dull"])	
+	fmt.Println(s1)	
+	delete(s1, "dull")
+	fmt.Println(s1["bell"], s1["dull"])	
+	fmt.Println(s1)	
+	fmt.Println(s2)	
+
+
+	counter := 0
+	for key, value := range s2 {
+		counter++
+		if counter == 2 {
+			fmt.Printf("Second el.: Key: %s, Value: %d\n", key, value)
+			break
+		}
+	}
+
+
+	pos, neg := adder(), adder()
+	for i := 0; i < 10; i++ {
+		fmt.Println(
+		pos(i),
+		neg(-2*i),
+			)
+	}
+
+	rec := Receiver{3, 4}
+	fmt.Println("rec1 Scale+Hyp:", rec.Hyp())
+	rec2 := Receiver{3, 4}
+	rec2.Scale(10)
+	fmt.Println("rec2 Scale+Hyp:", rec2.Hyp())
+	
+	tcp := TCP{}
+	udp := UDP{}
+
+	EstablishConnection(tcp)
+	EstablishConnection(udp)
+
 }
+
+
+type Connector interface { 
+	Connect() string
+}
+
+type TCP struct{}
+type UDP struct{}
+
+func (t TCP) Connect() string{
+	return "TCP:ConnEst"
+}
+
+func (u UDP) Connect() string{
+	return "UDP:ConnEst"
+}
+
+func EstablishConnection(c Connector){
+	fmt.Println(c.Connect())
+}
+
+
+func (v *Receiver) Scale(f float64) {
+	v.x = v.x * f 
+	v.y = v.y * f
+}
+
+type Receiver struct {
+	x, y float64
+}
+
+func (v Receiver) Hyp() float64 {
+	return math.Sqrt(v.x*v.x + v.y*v.y)
+}
+
+
+func adder() func(int) int {
+	sum := 0
+	return func(x int) int {
+		sum += x
+		return sum
+	}
+}
+
+type Coordinates struct {
+	Lat, Long float64
+}
+
+var m map[string]Coordinates
+var s1 = map[string]Coordinates{
+	"bell": {12.12, 12.12},
+	"dull": {12.13, 12.13},
+}
+
+var s2 = map[string]Coordinates{
+	"bell": {12.12, 12.12},
+	"dull dull": {12.13, 12.13},
+	"pull": {10.13, 10.13},
+}
+
+
+func Pic(dx, dy int) [][]uint8 {
+	img := make([][]uint8, dy)    // Create a slice with 'dy' rows
+	for y := 0; y < dy; y++ {
+		img[y] = make([]uint8, dx) // Each row has 'dx' columns
+		for x := 0; x < dx; x++ {
+			img[y][x] = uint8(x ^ y) // Replace this with any function to generate the image
+		}
+	}
+	return img
+}
+
+var powa = []int{1,2,4,8,16,32,64, 128} 
+
+func printSliceInt(s []int) {
+	fmt.Printf("Slice Int: %d len=%d cap=%d %v\n", s, len(s), cap(s), s)
+	}
+
+func printSlice(s string, x []int) {
+	fmt.Printf("Slice String: %s len=%d cap=%d %v\n", s, len(x), cap(x), x)
+	}
+
+
+const (
+	Big = 1 << 8
+	Small = Big >> 98
+)
+
+var  (
+	isFalse bool = false
+	maxInt  uint64 = 1<<64 -1
+	complx complex128 = cmplx.Sqrt(-5 + 12i)
+)
+
+func needInt(x int) int { return x*10 + 1}
 
 func arraysMatch(arr1, arr2 [5]int) bool {
 	return reflect.DeepEqual(arr1, arr2)
@@ -208,9 +412,6 @@ func arraysMatch(arr1, arr2 [5]int) bool {
 func (s MyStruct) matchesAnyArray(arr [5]int) bool {
 	return arraysMatch(s.Array1, arr) || arraysMatch(s.Array2, arr)
 }
-
-
-
 
 func pow(x, n, lim float64) float64 {
 	if v:= math.Pow(x, n); v < lim {
