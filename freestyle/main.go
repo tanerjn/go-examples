@@ -304,12 +304,51 @@ func main(){
 	
 	tcp := TCP{}
 	udp := UDP{}
+	quic := &QUIC{"QUIC"}
 
 	EstablishConnection(tcp)
 	EstablishConnection(udp)
+	EstablishConnection(quic)
+
+	var customConnector interface{}
+	describe(customConnector)
+	customConnector = 13	
+	describe(customConnector)
+	customConnector = "tring"	
+	describe(customConnector)
+
+	var iface interface{} = "iface"
+	s1 := iface.(string)
+	fmt.Println(s1)
+
+	s1, ok := iface.(string)
+	fmt.Println(s1, ok)
+	//f1 := iface.(float64) will panic atinterface conversion 
+	//fmt.Println(f1)
+	fl, ok := iface.(float64)
+	fmt.Println(fl, ok)
+
+	if err := printError(); err != nil {
+		fmt.Println(err)
+	}
+
+
+	
+	
 
 }
 
+type MyError struct {
+	When time.Time
+	What string
+}
+
+func printError() error {
+	return &MyError {
+		time.Now(),
+		"ERR",
+	}
+}
 
 type Connector interface { 
 	Connect() string
@@ -317,6 +356,9 @@ type Connector interface {
 
 type TCP struct{}
 type UDP struct{}
+type QUIC struct{
+	s string
+}
 
 func (t TCP) Connect() string{
 	return "TCP:ConnEst"
@@ -324,6 +366,18 @@ func (t TCP) Connect() string{
 
 func (u UDP) Connect() string{
 	return "UDP:ConnEst"
+}
+
+func (q *QUIC) Connect() string{
+	if q == nil {
+	fmt.Println("<nil>")
+	return("Method has nil input")
+	}
+	return(q.s+":ConnEst")
+}
+
+func describe(i interface{}) {
+	fmt.Printf("(%v, %T)\n", i, i)
 }
 
 func EstablishConnection(c Connector){
