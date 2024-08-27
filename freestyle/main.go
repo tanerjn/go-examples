@@ -10,6 +10,8 @@ import 	(
 	"reflect"
 	"strings"
 	"golang.org/x/tour/pic"
+	"io"
+	"sync"
 )
 
 var a, b  int = 1, 2
@@ -333,14 +335,97 @@ func main(){
 	}
 
 
-	
-	
+	fmt.Println(Sqrt(2))
+	fmt.Println(Sqrt(-2))
+	r :=  strings.NewReader("Reader New")
+	b := make([]byte, 12)
+	for { 
+	n, err := r.Read(b)
+	fmt.Printf("n = %v err = %v b = %v\n" , n, err, b)
+	fmt.Printf("b[:n] = %q\n", b[:n])
+	if err == io.EOF { 
+		break
+	}
+	}
 
+	var wgr sync.WaitGroup
+	wgr.Add(1) //Increment WaitGroup counter by 1 for the gorouitine
+	go say("world", &wgr)
+	wgr.Wait()
+	say("hello", nil) // call nil instead of wg bec it's not needed
+
+	ch := make(chan int, 2)
+	ch <- 1
+	ch <- 2
+	fmt.Println("first chval:", <-ch)
+	fmt.Println("second chval:", <-ch)
+
+	ch2 := make(chan int, 5)
+	go chancalc(cap(ch2), ch2)
+	for i := range ch2 {
+		fmt.Println(i)
+	}
+	
+	ch3 := make(chan int)
+	quit := make(chan int)
+	go func() {
+		for i := 0; i < 5; i++ {
+			fmt.Println(<-ch3)
+		}
+		quit <- 0
+	}()
+	chancalc2(ch3, quit)
+
+}
+
+
+func chancalc(n int, c chan int) {
+	x, y := 1, 10
+	for i:= 0; i<n ; i++ {
+	c <- x
+	x, y = y, x*y
+	}
+	close(c) //close a channel so no more values sent
+}
+
+func chancalc2(c, quit chan int) { 
+	x, y := 0, 1
+	for {
+		select {   //select will block one of cases run then it executes the case 
+		case c <-x:
+			x, y = y, x+y
+		case <-quit:
+			fmt.Println("quit")
+			return
+		default: 
+			fmt.Println("default")
+		}
+	}
+}
+
+
+	
+			
+
+func say(s string, wg *sync.WaitGroup) {
+	// if WaitGroup is not nil, then defer the Done
+	if wg != nil {
+	defer wg.Done() //Signal when goroutine is done
+	}
+
+	for i := 0; i < 5; i++ {
+		time.Sleep(100 * time.Millisecond)
+		fmt.Println(s)
+	}
 }
 
 type MyError struct {
 	When time.Time
 	What string
+}
+
+func (e *MyError) Error() string {
+	return fmt.Sprintf("at %v, %s", e.When, e.What)
 }
 
 func printError() error {
@@ -474,6 +559,10 @@ func pow(x, n, lim float64) float64 {
 		fmt.Printf("%g >= %g/n", v, lim)
 	}
 	return lim
+}
+
+func Sqrt(x float64) (float64, error) {
+	return 0, nil
 }
 
 func sqrt(x float64) string { 
