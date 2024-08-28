@@ -13,6 +13,8 @@ import 	(
 	"golang.org/x/tour/tree"
 	"io"
 	"sync"
+	"net/http"
+	"golang.org/x/net/html"
 )
 
 var a, b  int = 1, 2
@@ -326,7 +328,7 @@ func main(){
 
 	s1, ok := iface.(string)
 	fmt.Println(s1, ok)
-	//f1 := iface.(float64) will panic atinterface conversion 
+	//f1 := iface.(float64) will panic at interface conversion 
 	//fmt.Println(f1)
 	fl, ok := iface.(float64)
 	fmt.Println(fl, ok)
@@ -430,6 +432,78 @@ func main(){
 
 	time.Sleep(time.Second)
 	fmt.Println(c.Value("somekey"))
+
+	var wgCrawl sync.WaitGroup
+	visited := make(map[string]bool)
+	var mu sync.Mutex
+
+	//Start crawling from a seed URL
+	startURL := "https://example.com"
+	wgCrawl.Add(1)
+	go Crawl(startURL, &wgCrawl, visited, &mu)
+	wgCrawl.Wait()
+	fmt.Println("Crawling finished")
+
+
+}
+
+// Crawl fetches the URL, finds all links on the page, and crawls them recursively.
+func Crawl(url string, wg *sync.WaitGroup, visited map[string]bool, mu *sync.Mutex) {
+	defer wg.Done()
+
+	// Lock the visited map and check if the URL has already been visited
+	mu.Lock()
+	if visited[url] {
+		mu.Unlock()
+		return
+	}
+	visited[url] = true
+	mu.Unlock()
+
+	fmt.Println("Crawling:", url)
+
+	// Fetch the URL
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Println("Failed to fetch URL:", url, "Error:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Parse the HTML page
+	doc, err := html.Parse(resp.Body)
+	if err != nil {
+		fmt.Println("Failed to parse HTML:", err)
+		return
+	}
+
+	// Extract and visit links on the page
+	links := extractLinks(doc)
+	for _, link := range links {
+		if strings.HasPrefix(link, "http") { // Only crawl absolute URLs
+			wg.Add(1)
+			go Crawl(link, wg, visited, mu)
+		}
+	}
+}
+
+
+// extractLinks parses an HTML document and returns a slice of href links found in the document.
+func extractLinks(n *html.Node) []string {
+	var links []string
+	if n.Type == html.ElementNode && n.Data == "a" {
+		for _, attr := range n.Attr {
+			if attr.Key == "href" {
+				links = append(links, attr.Val)
+			}
+		}
+	}
+
+	// Recursively traverse the HTML nodes
+	for c := n.FirstChild; c != nil; c = c.NextSibling {
+		links = append(links, extractLinks(c)...)
+	}
+	return links
 }
 
 
