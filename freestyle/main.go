@@ -420,11 +420,36 @@ func main(){
 	fmt.Println("Tree 6 strutcture")
 	PrintTree(tree6, 0, " ")
 
-
-
 	fmt.Printf("Tree t1 and Tree t2 are the same: %v\n", Same(tree1, tree2)) // Should print: true
-	fmt.Printf("Tree t1 and Tree t2 are the same: %v\n", Same(tree1, tree3)) // Should print: true
+	fmt.Printf("Tree t1 and Tree t3 are the same: %v\n", Same(tree1, tree3)) // Should print: true
 
+	c := SafeCounter{v: make(map[string]int)}
+	for i :=0; i < 1000; i++ {
+		go c.Inc("somekey")
+	}
+
+	time.Sleep(time.Second)
+	fmt.Println(c.Value("somekey"))
+}
+
+
+type SafeCounter struct { 
+	mu sync.Mutex
+	v map[string]int
+}
+
+func (c *SafeCounter) Inc(key string) {
+	c.mu.Lock()
+	// one goroutine can access the map c.v at a time
+	c.v[key]++
+	c.mu.Unlock()
+}
+
+func (c *SafeCounter) Value(key string) int {
+	c.mu.Lock()
+	// Lock so only onone goroutine can access the map
+	defer c.mu.Unlock()
+	return c.v[key]
 }
 
 // Insert a new value into the tree
