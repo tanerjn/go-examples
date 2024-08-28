@@ -10,6 +10,7 @@ import 	(
 	"reflect"
 	"strings"
 	"golang.org/x/tour/pic"
+	"golang.org/x/tour/tree"
 	"io"
 	"sync"
 )
@@ -334,7 +335,6 @@ func main(){
 		fmt.Println(err)
 	}
 
-
 	fmt.Println(Sqrt(2))
 	fmt.Println(Sqrt(-2))
 	r :=  strings.NewReader("Reader New")
@@ -376,8 +376,134 @@ func main(){
 	}()
 	chancalc2(ch3, quit)
 
+	// Tree 1	
+	tree1 := &Tree{Value: 2}
+	Insert(tree1, 1)
+	Insert(tree1, 3)
+	fmt.Println("Tree 1 structure")
+	PrintTree(tree1, 0, "")
+
+
+	//Tree 2
+	tree2 := &Tree{Value: 2}
+	Insert(tree2, 1)
+	Insert(tree2, 3)
+	fmt.Println("Tree 2 structure")
+	PrintTree(tree2, 0, "")
+
+	//Tree 3
+	tree3 := &Tree{Value:4}
+	Insert(tree3, 1)
+	Insert(tree3, 8)
+	Insert(tree3, 4)
+	Insert(tree3, 5)
+	fmt.Println("Tree 3 structure")
+	PrintTree(tree3, 0, " ")
+
+	//Tree 6
+	tree6 := &Tree{Value:15}
+	Insert(tree6, 90)
+	Insert(tree6, 80)
+	Insert(tree6, 70)
+	Insert(tree6, 100)
+	Insert(tree6, 40)
+	Insert(tree6, 145)
+	Insert(tree6, 70)
+	Insert(tree6, 105)
+	Insert(tree6, 4)
+	Insert(tree6, 4)
+	Insert(tree6, 115)
+	Insert(tree6, 8)
+	Insert(tree6, 7)
+	Insert(tree6, 120)
+	Insert(tree6, 125)
+	fmt.Println("Tree 6 strutcture")
+	PrintTree(tree6, 0, " ")
+
+
+
+	fmt.Printf("Tree t1 and Tree t2 are the same: %v\n", Same(tree1, tree2)) // Should print: true
+	fmt.Printf("Tree t1 and Tree t2 are the same: %v\n", Same(tree1, tree3)) // Should print: true
+
 }
 
+// Insert a new value into the tree
+func Insert(root *Tree, value int) *Tree {
+    if root == nil {
+        return &Tree{Value: value}
+    }
+    if value < root.Value {
+        root.Left = Insert(root.Left, value)
+    } else {
+        root.Right = Insert(root.Right, value)
+    }
+    return root
+}
+
+// Walk walks the tree t sending all values
+// from the tree to the channel ch.
+func Walk(t *tree.Tree, ch chan int) {
+   var inorder func(*tree.Tree)
+    inorder = func(t *tree.Tree) {
+        if t == nil {
+            return
+        }
+        inorder(t.Left)
+		fmt.Printf("t left: %v", t.Left)
+        ch <- t.Value
+		fmt.Printf("t.Value: %v", t.Value)
+        inorder(t.Right)
+	fmt.Println(t.Right)
+		fmt.Printf("t.right: %v", t.Right)
+    }
+    go func() {
+        inorder(t)
+        close(ch)
+    }()
+
+}
+
+func PrintTree(root *Tree, level int, prefix string) {
+    if root == nil {
+        return
+    }
+    // Print the current node
+    fmt.Printf("%s%s%d\n", strings.Repeat("  ", level), prefix, root.Value)
+    // Print the right subtree
+    if root.Right != nil {
+        PrintTree(root.Right, level+1, "R-- ")
+    } else {
+        fmt.Printf("%s%s\n", strings.Repeat("  ", level+1), "R-- nil")
+    }
+    // Print the left subtree
+    if root.Left != nil {
+        PrintTree(root.Left, level+1, "L-- ")
+    } else {
+        fmt.Printf("%s%s\n", strings.Repeat("  ", level+1), "L-- nil")
+    }
+}
+
+// Same checks if two trees t1 and t2 are identical
+func Same(t1, t2 *Tree) bool {
+    var sameTrees func(*Tree, *Tree) bool
+    sameTrees = func(t1, t2 *Tree) bool {
+        if t1 == nil && t2 == nil {
+            return true
+        }
+        if t1 == nil || t2 == nil {
+            return false
+        }
+        return t1.Value == t2.Value && sameTrees(t1.Left, t2.Left) && sameTrees(t1.Right, t2.Right)
+    }
+    return sameTrees(t1, t2)
+}
+
+
+type Tree struct {
+	Left  *Tree
+	Value int
+	Right *Tree
+}
 
 func chancalc(n int, c chan int) {
 	x, y := 1, 10
@@ -402,11 +528,7 @@ func chancalc2(c, quit chan int) {
 		}
 	}
 }
-
-
-	
 			
-
 func say(s string, wg *sync.WaitGroup) {
 	// if WaitGroup is not nil, then defer the Done
 	if wg != nil {
